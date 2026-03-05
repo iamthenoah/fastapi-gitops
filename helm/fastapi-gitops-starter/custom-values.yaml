@@ -1,0 +1,55 @@
+# Custom values for HPA and load testing
+replicaCount: 2
+
+image:
+  repository: fastapi-gitops-starter
+  pullPolicy: Never
+  tag: "latest"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 10
+  targetMemoryUtilizationPercentage: 80
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  hosts:
+    - host: minikube.test
+      paths:
+        - path: /GitOps-Starter
+          pathType: Prefix
+  tls: []
+
+livenessProbe:
+  httpGet:
+    path: /GitOps-Starter/health
+    port: http
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /GitOps-Starter/health
+    port: http
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
